@@ -513,30 +513,30 @@ void initState() {
       macOS: macOSPlatformChannelSpecifics);
 
   // Schedule the notification at the specific time of the due date
-  await flutterLocalNotificationsPlugin.zonedSchedule(
-    0, // Notification ID
-    'Synthase', // Notification title
-    'Don\'t forget to complete $habitName today!', // Notification body
-    tz.TZDateTime.from(dueDate.add(Duration(minutes: 0)), tz.local), // Add 1 minute to ensure notification time is in the future
-    platformChannelSpecifics,
-    androidAllowWhileIdle: true,
-    uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-    matchDateTimeComponents: DateTimeComponents.time,
-  );
+  // await flutterLocalNotificationsPlugin.zonedSchedule(
+  //   0, // Notification ID
+  //   'Synthase', // Notification title
+  //   'Don\'t forget to complete $habitName today!', // Notification body
+  //   //tz.TZDateTime.from(dueDate.add(Duration(minutes: 0)), tz.local), // Add 1 minute to ensure notification time is in the future
+  //   //platformChannelSpecifics,
+  //   androidAllowWhileIdle: true,
+  //   uiLocalNotificationDateInterpretation:
+  //       UILocalNotificationDateInterpretation.absoluteTime,
+  //   matchDateTimeComponents: DateTimeComponents.time,
+  // );
 }
 
 
 
-tz.TZDateTime _nextInstanceOfDueDate(DateTime dueDate) {
-  final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-  tz.TZDateTime scheduledDate =
-      tz.TZDateTime(tz.local, dueDate.year, dueDate.month, dueDate.day);
-  if (scheduledDate.isBefore(now)) {
-    scheduledDate = scheduledDate.add(const Duration(days: 1));
-  }
-  return scheduledDate;
-}
+// tz.TZDateTime _nextInstanceOfDueDate(DateTime dueDate) {
+//   final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+//   tz.TZDateTime scheduledDate =
+//       tz.TZDateTime(tz.local, dueDate.year, dueDate.month, dueDate.day);
+//   if (scheduledDate.isBefore(now)) {
+//     scheduledDate = scheduledDate.add(const Duration(days: 1));
+//   }
+//   return scheduledDate;
+// }
 
 
   List<EmbeddedLink> adviceLinks = [
@@ -632,7 +632,7 @@ Widget _buildHomePage() {
               ),
               child: Text(
                 'Weekly Calendar', // Updated label
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
           ),
@@ -654,7 +654,7 @@ Widget _buildHomePage() {
               ),
               child: Text(
                 'Upcoming Tasks for ${DateFormat('MM/dd/yy').format(_selectedDate)}', // Updated label with selected date
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
           ),
@@ -715,7 +715,7 @@ Widget _buildHomePage() {
               ),
               child: Text(
                 'Tasks', // Updated label
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
           ),
@@ -778,7 +778,7 @@ void _addNewHabit(Habit habit) {
         child: ListTile(
           title: Text(
             habit.name,
-            style: Theme.of(context).textTheme.bodyText1,
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
           trailing: Checkbox(
             value: habit.isCompleted(DateTime.now()), // Check if habit is completed today
@@ -1170,7 +1170,7 @@ Widget _buildQuoteCarousel() {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: theme.textTheme.bodyText1!.color,
+                              color: theme.textTheme.bodyLarge!.color,
                             ),
                             textAlign: TextAlign.center,
                           ),
