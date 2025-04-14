@@ -1,0 +1,18 @@
+{
+  "" : {
+    "diagnostics" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/flutter_local_notifications-master.dia",
+    "emit-module-dependencies" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/flutter_local_notifications-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/flutter_local_notifications-master-emit-module.dia",
+    "swift-dependencies" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/flutter_local_notifications-master.swiftdeps"
+  },
+  "/Users/devinthenuwara/.pub-cache/hosted/pub.dev/flutter_local_notifications-8.2.0/macos/Classes/FlutterLocalNotificationsPlugin.swift" : {
+    "const-values" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin.swiftconstvalues",
+    "dependencies" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin.d",
+    "diagnostics" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin.dia",
+    "index-unit-output-path" : "/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin.o",
+    "llvm-bc" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin.bc",
+    "object" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin.o",
+    "swift-dependencies" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin.swiftdeps",
+    "swiftmodule" : "/Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/build/macos/Build/Intermediates.noindex/Pods.build/Debug/flutter_local_notifications.build/Objects-normal/arm64/FlutterLocalNotificationsPlugin~partial.swiftmodule"
+  }
+}
