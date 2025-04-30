@@ -1,1 +1,0 @@
- /Users/devinthenuwara/Documents/GitHub/MobileApps/synthase_points2/.dart_tool/flutter_build/3bfd981dbfa161964d05f0fabbbf4a8a/native_assets.yaml: 
