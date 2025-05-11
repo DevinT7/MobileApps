@@ -16,12 +16,22 @@ export default class App extends Component {
       priority: 'Medium',
       darkMode: false,
       editIndex: null,
+      currentScreen: 'home',
+      journalEntry: '',
+      journalEntries: [], 
+      motivationalQuotes: [
+        "You are capable of amazing things.",
+        "Don't watch the clock; do what it does. Keep going.",
+        "Believe you can and you're halfway there.",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts."
+      ]
     };
   }
 
   componentDidMount() {
     this.loadAssignments();
     this.loadDarkMode();
+    this.loadJournalEntries(); // Load saved journal entries
   }
 
   saveAssignments = async () => {
@@ -62,6 +72,36 @@ export default class App extends Component {
     }
   };
 
+saveJournalEntries = async () => {
+    try {
+      await AsyncStorage.setItem('journalEntries', JSON.stringify(this.state.journalEntries));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  loadJournalEntries = async () => {
+    try {
+      const journalEntries = await AsyncStorage.getItem('journalEntries');
+      if (journalEntries) {
+        this.setState({ journalEntries: JSON.parse(journalEntries) });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  handleJournalChange = (text) => {
+    this.setState({ journalEntry: text });
+  };
+
+addJournalEntry = () => {
+  if (this.state.journalEntry.trim() !== '') {
+    const newJournalEntries = [...this.state.journalEntries, this.state.journalEntry];
+    this.setState({ journalEntries: newJournalEntries, journalEntry: '' }, this.saveJournalEntries);
+  }
+};
+
   handleAssignmentChange = (text) => {
     this.setState({ newAssignment: text });
   };
@@ -72,6 +112,10 @@ export default class App extends Component {
 
   handlePriorityChange = (text) => {
     this.setState({ priority: text });
+  };
+
+  handleJournalChange = (text) => {
+    this.setState({ journalEntry: text }, this.saveJournal);
   };
 
   addOrEditAssignment = () => {
@@ -114,45 +158,9 @@ export default class App extends Component {
     this.setState({ darkMode: !this.state.darkMode }, this.saveDarkMode);
   };
 
-  generateCalendar = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    const calendar = [];
-    let week = [];
-
-    for (let i = 0; i < firstDay; i++) {
-      week.push(null); // empty cells
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      week.push(day);
-      if (week.length === 7) {
-        calendar.push(week);
-        week = [];
-      }
-    }
-
-    if (week.length) {
-      while (week.length < 7) {
-        week.push(null);
-      }
-      calendar.push(week);
-    }
-
-    return calendar;
-  };
-
-  render() {
+  renderHomeScreen = () => {
     return (
-      <ScrollView style={[styles.container, this.state.darkMode && styles.darkContainer]} contentContainerStyle={{ paddingBottom: 100 }}>
-        <Text style={[styles.header, this.state.darkMode && styles.darkText]}>Student Planner</Text>
-        <Switch value={this.state.darkMode} onValueChange={this.toggleDarkMode} />
-
+      <View>
         <TextInput
           style={[styles.input, this.state.darkMode && styles.darkInput]}
           placeholder="Enter assignment title"
@@ -160,7 +168,6 @@ export default class App extends Component {
           value={this.state.newAssignment}
           onChangeText={this.handleAssignmentChange}
         />
-
         <TextInput
           style={[styles.input, this.state.darkMode && styles.darkInput]}
           placeholder="Enter due date (YYYY-MM-DD)"
@@ -168,46 +175,9 @@ export default class App extends Component {
           value={this.state.dueDate}
           onChangeText={this.handleDueDateChange}
         />
-
-        <Text style={[styles.sectionTitle, this.state.darkMode && styles.darkText]}>
-          Select Due Date (Current Month)
-        </Text>
-
-        <View style={styles.calendarContainer}>
-          {this.generateCalendar().map((week, rowIndex) => (
-            <View key={rowIndex} style={styles.calendarRow}>
-              {week.map((day, colIndex) => (
-                <TouchableOpacity
-                  key={colIndex}
-                  style={[
-  styles.calendarCell,
-  day && this.state.dueDate.endsWith(`-${day.toString().padStart(2, '0')}`) && styles.selectedDay,
-]}
-
-                  onPress={() => {
-                    if (day) {
-                      const today = new Date();
-                      const month = today.getMonth() + 1;
-                      const dateStr = `${today.getFullYear()}-${month.toString().padStart(2, '0')}-${day
-                        .toString()
-                        .padStart(2, '0')}`;
-                      this.setState({ dueDate: dateStr });
-                    }
-                  }}
-                >
-                  <Text style={[styles.calendarText, this.state.darkMode && styles.darkText]}>
-                    {day ? day : ''}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ))}
-        </View>
-
         <TouchableOpacity style={styles.button} onPress={this.addOrEditAssignment}>
           <Text style={styles.buttonText}>{this.state.editIndex !== null ? 'Update Assignment' : 'Add Assignment'}</Text>
         </TouchableOpacity>
-
         <ScrollView style={styles.listContainer}>
           {this.state.assignments.map((assignment, index) => (
             <View key={index} style={styles.assignmentItem}>
@@ -215,7 +185,6 @@ export default class App extends Component {
                 {assignment.title} ({assignment.priority})
               </Text>
               <Text style={[styles.assignmentDueDate, this.state.darkMode && styles.darkText]}>Due: {assignment.dueDate}</Text>
-
               <TouchableOpacity onPress={() => this.editAssignment(index)}>
                 <Text style={styles.editButton}>Edit</Text>
               </TouchableOpacity>
@@ -225,144 +194,264 @@ export default class App extends Component {
             </View>
           ))}
         </ScrollView>
+      </View>
+    );
+  };
+
+renderJournalScreen = () => {
+  return (
+    <View>
+      <TextInput
+        style={[styles.input, this.state.darkMode && styles.darkInput, { height: 200 }]}
+        multiline
+        placeholder="Write your thoughts here..."
+        placeholderTextColor="#aaa"
+        value={this.state.journalEntry}
+        onChangeText={this.handleJournalChange}
+      />
+      <TouchableOpacity style={styles.button} onPress={this.addJournalEntry}>
+        <Text style={styles.buttonText}>Save Journal Entry</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => this.setState({ currentScreen: 'viewJournal' })}>
+        <Text style={styles.buttonText}>View Saved Entries</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+  renderViewJournalScreen = () => {
+    return (
+      <View>
+        <Text style={[styles.header, this.state.darkMode && styles.darkText]}>Saved Journal Entries</Text>
+        <ScrollView>
+          {this.state.journalEntries.length > 0 ? (
+            this.state.journalEntries.map((entry, index) => (
+              <View key={index} style={styles.journalEntryContainer}>
+                <Text style={[styles.journalText, this.state.darkMode && styles.darkText]}>{entry}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noEntriesText}>No journal entries saved yet.</Text>
+          )}
+        </ScrollView>
+        <TouchableOpacity style={styles.button} onPress={() => this.setState({ currentScreen: 'journal' })}>
+          <Text style={styles.buttonText}>Back to Journal</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+
+  renderQuotesScreen = () => {
+    return (
+      <View>
+        {this.state.motivationalQuotes.map((quote, index) => (
+          <Text key={index} style={[styles.quoteText, this.state.darkMode && styles.darkText]}>{quote}</Text>
+        ))}
+      </View>
+    );
+  };
+
+  renderActivitiesScreen = () => {
+    return (
+      <Text style={[styles.sectionTitle, this.state.darkMode && styles.darkText]}>Nearby student activities coming soon!</Text>
+    );
+  };
+
+renderCurrentScreen = () => {
+  switch (this.state.currentScreen) {
+    case 'home': return this.renderHomeScreen();
+    case 'journal': return this.renderJournalScreen();
+    case 'viewJournal': return this.renderViewJournalScreen(); 
+    case 'quotes': return this.renderQuotesScreen();
+    case 'activities': return this.renderActivitiesScreen();
+    default: return this.renderHomeScreen();
+  }
+};
+
+
+  render() {
+    return (
+      <ScrollView style={[styles.container, this.state.darkMode && styles.darkContainer]}>
+        <Text style={[styles.header, this.state.darkMode && styles.darkText]}>Student Planner</Text>
+        <Switch value={this.state.darkMode} onValueChange={this.toggleDarkMode} />
+
+        <View style={styles.navBar}>
+          {['home', 'journal', 'quotes', 'activities'].map((screen) => (
+            <TouchableOpacity key={screen} onPress={() => this.setState({ currentScreen: screen })}>
+              <Text style={[styles.navButton, this.state.currentScreen === screen && styles.selectedNav]}>{screen}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {this.renderCurrentScreen()}
       </ScrollView>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: { 
-    height: deviceHeight, 
-    width: deviceWidth, 
-    padding: 10, 
-    backgroundColor: '#f5f5f5' 
-      
-  },
-  
-  darkContainer: {
-      backgroundColor: '#333' 
-      
-  },
-  
-  header: { 
-  fontSize: 18, 
-  fontWeight: 'bold', 
-  textAlign: 'center', 
-  marginBottom: 10 
-      
-  },
-  
-  darkText: { 
-      color: '#fff' 
-      
-  },
-  
-  input: {
-    height: 40, 
-    borderColor: '#ccc', 
-    borderWidth: 1, 
-    borderRadius: 5,
-    paddingHorizontal: 10, 
-    marginBottom: 10, 
-    backgroundColor: '#fff'
-  },
-  
-  darkInput: { 
-      backgroundColor: '#666', 
-      color: '#fff' 
-      
-  },
-  
-  button: { 
-      backgroundColor: '#007bff', 
-      padding: 10, 
-      borderRadius: 5, 
-      alignItems: 'center' 
-      
-  },
-  
-  buttonText: { 
-      color: 'white', 
-      fontWeight: 'bold' 
-      
-  },
-  
-  listContainer: { 
-      marginTop: 10 
-      
-  },
-  
-  assignmentItem: {
-    padding: 10, 
-    backgroundColor: '#fff', 
-    marginBottom: 5, 
-    borderRadius: 5,
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center'
-  },
-  
-  assignmentTitle: { 
-      fontSize: 16, 
-      flex: 1
-  },
-  
-  completed: { 
-      textDecorationLine: 'line-through', 
-      backgroundColor: '#d4edda' 
-      
-  },
-  
-  assignmentDueDate: { 
-      fontSize: 14, 
-      color: '#888' 
-      
-  },
-  
-  deleteButton: { 
-      color: 'red', 
-      fontWeight: 'bold' 
-      
-  },
 
-  sectionTitle: { 
-      fontSize: 18, 
-      fontWeight: 'bold', 
-      marginTop: 15, 
-      marginBottom: 5 
-      
+const styles = StyleSheet.create({
+  container: {
+    minHeight: deviceHeight,
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    backgroundColor: '#f0f4f8', // Lighter background color
+    flex: 1,
   },
-  
-  calendarContainer: {
-    marginBottom: 10, 
-    padding: 5, 
-    borderRadius: 5, 
-    backgroundColor: '#eaeaea'
+  darkContainer: {
+    backgroundColor: '#121212',
   },
-  
-  calendarRow: { 
-      flexDirection: 'row', 
-      justifyContent: 'space-around', 
-      marginVertical: 1
-      
+  header: {
+    fontSize: 30,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 30,
+    color: '#4a90e2', // Blue accent color
+    fontFamily: 'Roboto', // Add custom font if needed
   },
-  
-  calendarCell: {
-    width: 20, 
-    height: 20, 
-    justifyContent: 'center', 
-    alignItems: 'center',
-    backgroundColor: '#fff', 
-    borderRadius: 2,
+  darkText: {
+    color: '#f0f0f0',
   },
-  
-  selectedDay: { 
-      backgroundColor: '#007bff' 
-      
+  input: {
+    height: 50,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    marginBottom: 15,
+    fontSize: 16,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontFamily: 'Roboto',
+    shadowColor: '#ccc',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 6,
+    elevation: 3,
   },
-  
-  calendarText: { 
-      color: '#000', 
-      fontWeight: 'bold' 
+  darkInput: {
+    backgroundColor: '#333',
+    color: '#fff',
+    borderColor: '#555',
+  },
+  button: {
+    backgroundColor: '#4a90e2',
+    paddingVertical: 16,
+    borderRadius: 30,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+  },
+  listContainer: {
+    marginTop: 15,
+  },
+  assignmentItem: {
+    padding: 20,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    shadowColor: '#ccc',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  assignmentTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 5,
+    color: '#333',
+  },
+  completed: {
+    textDecorationLine: 'line-through',
+    opacity: 0.5,
+  },
+  assignmentDueDate: {
+    fontSize: 14,
+    color: '#777',
+    marginBottom: 10,
+  },
+  deleteButton: {
+    color: '#e63946',
+    fontWeight: '600',
+    marginTop: 10,
+  },
+  editButton: {
+    color: '#4a90e2',
+    fontWeight: '600',
+    marginTop: 5,
+  },
+  navBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 25,
+    paddingVertical: 12,
+    borderRadius: 25,
+    backgroundColor: '#ffffff',
+    shadowColor: '#ccc',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  navButton: {
+    padding: 12,
+    fontWeight: '600',
+    fontSize: 16,
+    color: '#555',
+    fontFamily: 'Roboto',
+  },
+  selectedNav: {
+    color: '#4a90e2',
+    textDecorationLine: 'underline',
+  },
+  quoteText: {
+    fontSize: 18,
+    fontStyle: 'italic',
+    marginVertical: 15,
+    padding: 18,
+    borderRadius: 15,
+    backgroundColor: '#e3f2fd',
+    textAlign: 'center',
+    color: '#333',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    textAlign: 'center',
+    paddingVertical: 30,
+    fontWeight: '700',
+    color: '#777',
+  },
+  journalEntryContainer: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 15,
+    marginBottom: 12,
+    padding: 16,
+    shadowColor: '#ccc',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  journalText: {
+    fontSize: 16,
+    color: '#333',
+    fontStyle: 'italic',
+  },
+  noEntriesText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
   },
 });
